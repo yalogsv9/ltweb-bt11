@@ -29,6 +29,14 @@ public class VideoDAOImpl_24110291 implements IVideoDAO_24110291 {
         v.setCategoryName(rs.getString("Categoryname"));
         v.setShareCount(rs.getInt("ShareCount"));
         v.setLikeCount(rs.getInt("LikeCount"));
+        try {
+            double p = rs.getDouble("Price");
+            if (!rs.wasNull() && p > 0) {
+                v.setPrice(p);
+            }
+        } catch (Exception ignored) {
+            // Su dung gia mac dinh 50000 neu chua co cot Price trong DB
+        }
         return v;
     }
 

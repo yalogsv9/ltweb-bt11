@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <html>
 <head><title>Sản phẩm</title></head>
@@ -22,12 +23,18 @@
                 <tr>
                     <c:forEach var="v" items="${b.videos}">
                         <td>
-                            Tiêu đề: <a href="${ctx}/video?id=${v.videoId}">${v.title}</a><br>
+                            Tiêu đề: <a href="${ctx}/video?id=${v.videoId}"><b>${v.title}</b></a><br>
                             Mã video: ${v.videoId}<br>
-                            Category name: ${v.categoryName}<br>
-                            View: ${v.views}<br>
-                            Share(${v.shareCount})<br>
-                            Like(${v.likeCount})
+                            Danh mục: ${v.categoryName}<br>
+                            Giá bán: <b style="color:#b02a2a;"><fmt:formatNumber value="${v.price}" pattern="#,##0"/> đ</b><br>
+                            <small style="color:#666;">Lượt xem: ${v.views} | Share: ${v.shareCount} | Like: ${v.likeCount}</small>
+                            <form action="${ctx}/cart" method="post" style="margin-top:8px;">
+                                <input type="hidden" name="action" value="add">
+                                <input type="hidden" name="videoId" value="${v.videoId}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn" style="padding:4px 10px; font-size:12px;">+ Thêm vào giỏ</button>
+                                <a href="${ctx}/video?id=${v.videoId}" class="btn gray" style="padding:4px 10px; font-size:12px;">Chi tiết</a>
+                            </form>
                         </td>
                     </c:forEach>
                     <c:forEach begin="${b.videos.size()}" end="2"><td></td></c:forEach>

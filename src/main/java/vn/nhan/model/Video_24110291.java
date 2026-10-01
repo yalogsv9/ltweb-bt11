@@ -11,6 +11,7 @@ public class Video_24110291 {
     private String categoryName;
     private int shareCount;
     private int likeCount;
+    private double price = 50000.0;
 
     public String getVideoId() { return videoId; }
     public void setVideoId(String videoId) { this.videoId = videoId; }
@@ -32,4 +33,6 @@ public class Video_24110291 {
     public void setShareCount(int shareCount) { this.shareCount = shareCount; }
     public int getLikeCount() { return likeCount; }
     public void setLikeCount(int likeCount) { this.likeCount = likeCount; }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 }
