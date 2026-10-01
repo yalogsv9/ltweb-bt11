@@ -3,7 +3,9 @@ package vn.nhan.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,57 +25,74 @@ public class OrderServiceTest_24110291 {
     private Video_24110291 v2;
 
     static class MockOrderDAO implements IOrderDAO_24110291 {
-        Order_24110291 savedOrder;
-        List<OrderDetail_24110291> savedDetails;
-        int nextId = 101;
+        List<Order_24110291> ordersList = new ArrayList<>();
+        int nextId = 1;
 
         @Override
         public int createOrder(Order_24110291 order, List<OrderDetail_24110291> details) {
-            this.savedOrder = order;
-            this.savedDetails = details;
-            order.setOrderId(nextId);
-            return nextId;
+            order.setOrderId(nextId++);
+            order.setItems(details);
+            ordersList.add(order);
+            return order.getOrderId();
         }
 
         @Override
         public Order_24110291 findById(int orderId) {
-            if (savedOrder != null && savedOrder.getOrderId() == orderId) {
-                savedOrder.setItems(savedDetails);
-                return savedOrder;
+            for (Order_24110291 o : ordersList) {
+                if (o.getOrderId() == orderId) return o;
             }
             return null;
         }
 
         @Override
         public List<OrderDetail_24110291> findDetailsByOrderId(int orderId) {
-            return savedDetails;
+            Order_24110291 o = findById(orderId);
+            return o != null ? o.getItems() : new ArrayList<>();
         }
 
         @Override
         public List<Order_24110291> findByUsername(String username) {
-            List<Order_24110291> list = new ArrayList<>();
-            if (savedOrder != null && (username == null || username.equals(savedOrder.getUsername()))) {
-                list.add(savedOrder);
-            }
-            return list;
+            return findByUsernameAndStatus(username, null);
         }
 
         @Override
         public List<Order_24110291> findByUsernameAndStatus(String username, String status) {
-            List<Order_24110291> list = new ArrayList<>();
-            if (savedOrder != null) {
-                boolean matchUser = (username == null || username.equals(savedOrder.getUsername()));
-                boolean matchStatus = (status == null || status.equals(savedOrder.getStatus()));
+            List<Order_24110291> result = new ArrayList<>();
+            for (Order_24110291 o : ordersList) {
+                boolean matchUser = (username == null || username.equals(o.getUsername()));
+                boolean matchStatus = (status == null || "all".equalsIgnoreCase(status) || status.equals(o.getStatus()));
                 if (matchUser && matchStatus) {
-                    list.add(savedOrder);
+                    result.add(o);
                 }
             }
-            return list;
+            return result;
         }
 
         @Override
         public List<Order_24110291> findAll(String status) {
             return findByUsernameAndStatus(null, status);
+        }
+
+        @Override
+        public Map<String, Integer> countOrdersByStatus(String username) {
+            Map<String, Integer> map = new HashMap<>();
+            for (Order_24110291 o : ordersList) {
+                if (username == null || username.equals(o.getUsername())) {
+                    map.put(o.getStatus(), map.getOrDefault(o.getStatus(), 0) + 1);
+                }
+            }
+            return map;
+        }
+
+        @Override
+        public int countTotal(String username) {
+            int count = 0;
+            for (Order_24110291 o : ordersList) {
+                if (username == null || username.equals(o.getUsername())) {
+                    count++;
+                }
+            }
+            return count;
         }
     }
 
@@ -121,38 +140,69 @@ public class OrderServiceTest_24110291 {
 
         int orderId = orderService.createOrder(order, cart);
 
-        assertEquals(101, orderId);
-        assertNotNull(mockDAO.savedOrder);
-        assertEquals("COD", mockDAO.savedOrder.getPaymentMethod());
-        assertEquals("Đơn hàng mới", mockDAO.savedOrder.getStatus());
-        assertEquals(160000.0, mockDAO.savedOrder.getTotalAmount());
-        assertEquals(2, mockDAO.savedDetails.size());
+        assertEquals(1, orderId);
+        Order_24110291 saved = mockDAO.findById(orderId);
+        assertNotNull(saved);
+        assertEquals("COD", saved.getPaymentMethod());
+        assertEquals("Đơn hàng mới", saved.getStatus());
+        assertEquals(160000.0, saved.getTotalAmount());
+        assertEquals(2, saved.getItems().size());
 
         // Kiem tra chi tiet tung mon
-        OrderDetail_24110291 d1 = mockDAO.savedDetails.get(0);
+        OrderDetail_24110291 d1 = saved.getItems().get(0);
         assertEquals("V001", d1.getVideoId());
         assertEquals(2, d1.getQuantity());
         assertEquals(100000.0, d1.getAmount());
 
-        OrderDetail_24110291 d2 = mockDAO.savedDetails.get(1);
+        OrderDetail_24110291 d2 = saved.getItems().get(1);
         assertEquals("V002", d2.getVideoId());
         assertEquals(1, d2.getQuantity());
         assertEquals(60000.0, d2.getAmount());
     }
 
     @Test
-    void testFindById() {
+    void test8OrderStatusesFilter() {
+        String[] statuses = {
+            "Đơn hàng mới",
+            "Đã xác nhận",
+            "Chuẩn bị hàng",
+            "Vận chuyển",
+            "Giao hàng",
+            "Đã giao",
+            "Đơn hàng hủy",
+            "Đơn hàng hoàn"
+        };
+
+        // Tao 8 don hang tuong ung voi 8 trang thai
         cart.add(v1, 1);
-        Order_24110291 order = new Order_24110291();
-        order.setReceiverName("Tran Van B");
-        order.setReceiverPhone("0912345678");
-        order.setReceiverAddress("456 Duong XYZ");
+        for (String st : statuses) {
+            Order_24110291 o = new Order_24110291();
+            o.setUsername("user1");
+            o.setReceiverName("Khach " + st);
+            o.setReceiverPhone("0900000000");
+            o.setReceiverAddress("TP.HCM");
+            o.setStatus(st);
+            orderService.createOrder(o, cart);
+        }
 
-        int id = orderService.createOrder(order, cart);
-        Order_24110291 found = orderService.findById(id);
+        assertEquals(8, orderService.countTotal("user1"));
 
-        assertNotNull(found);
-        assertEquals("Tran Van B", found.getReceiverName());
-        assertEquals(1, found.getItems().size());
+        // Kiem tra loc rieng tung trang thai
+        for (String st : statuses) {
+            List<Order_24110291> list = orderService.findOrders("user1", st);
+            assertEquals(1, list.size(), "Trạng thái " + st + " phải có đúng 1 đơn hàng");
+            assertEquals(st, list.get(0).getStatus());
+        }
+
+        // Kiem tra loc 'all' hoac null
+        List<Order_24110291> allOrders = orderService.findOrders("user1", null);
+        assertEquals(8, allOrders.size());
+
+        // Kiem tra dem so luong tung trang thai
+        Map<String, Integer> counts = orderService.countOrdersByStatus("user1");
+        assertEquals(8, counts.size());
+        for (String st : statuses) {
+            assertEquals(1, counts.get(st));
+        }
     }
 }

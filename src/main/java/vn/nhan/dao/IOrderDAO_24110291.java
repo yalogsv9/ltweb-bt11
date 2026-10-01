@@ -36,4 +36,14 @@ public interface IOrderDAO_24110291 {
      * Lay tat ca don hang (ho tro admin hoac tra cuu tat ca) co loc theo trang thai neu co.
      */
     List<Order_24110291> findAll(String status);
+
+    /**
+     * Dem so luong don hang theo tung trang thai cho username (hoac tat ca neu username null).
+     */
+    java.util.Map<String, Integer> countOrdersByStatus(String username);
+
+    /**
+     * Dem tong so don hang cho username (hoac tat ca neu username null).
+     */
+    int countTotal(String username);
 }

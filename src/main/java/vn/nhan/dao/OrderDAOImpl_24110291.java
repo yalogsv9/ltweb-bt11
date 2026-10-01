@@ -226,4 +226,51 @@ public class OrderDAOImpl_24110291 implements IOrderDAO_24110291 {
     public List<Order_24110291> findAll(String status) {
         return findByUsernameAndStatus(null, status);
     }
+
+    @Override
+    public java.util.Map<String, Integer> countOrdersByStatus(String username) {
+        ensureTablesExist();
+        java.util.Map<String, Integer> map = new java.util.HashMap<>();
+        StringBuilder sql = new StringBuilder("SELECT Status, COUNT(*) AS Cnt FROM Orders ");
+        if (username != null && !username.trim().isEmpty()) {
+            sql.append("WHERE Username = ? ");
+        }
+        sql.append("GROUP BY Status");
+
+        try (Connection c = DBConnection_24110291.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql.toString())) {
+            if (username != null && !username.trim().isEmpty()) {
+                ps.setString(1, username.trim());
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    map.put(rs.getString("Status"), rs.getInt("Cnt"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return map;
+    }
+
+    @Override
+    public int countTotal(String username) {
+        ensureTablesExist();
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Orders ");
+        if (username != null && !username.trim().isEmpty()) {
+            sql.append("WHERE Username = ?");
+        }
+
+        try (Connection c = DBConnection_24110291.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql.toString())) {
+            if (username != null && !username.trim().isEmpty()) {
+                ps.setString(1, username.trim());
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

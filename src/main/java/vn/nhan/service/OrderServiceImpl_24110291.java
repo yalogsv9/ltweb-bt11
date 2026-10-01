@@ -63,4 +63,14 @@ public class OrderServiceImpl_24110291 implements IOrderService_24110291 {
     public List<Order_24110291> findAllOrders(String status) {
         return orderDAO.findAll(status);
     }
+
+    @Override
+    public java.util.Map<String, Integer> countOrdersByStatus(String username) {
+        return orderDAO.countOrdersByStatus(username);
+    }
+
+    @Override
+    public int countTotal(String username) {
+        return orderDAO.countTotal(username);
+    }
 }

@@ -26,4 +26,14 @@ public interface IOrderService_24110291 {
      * Lay tat ca don hang (cho phep loc theo trang thai).
      */
     List<Order_24110291> findAllOrders(String status);
+
+    /**
+     * Dem so luong don hang theo tung trang thai.
+     */
+    java.util.Map<String, Integer> countOrdersByStatus(String username);
+
+    /**
+     * Dem tong so luong don hang.
+     */
+    int countTotal(String username);
 }

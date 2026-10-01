@@ -7,6 +7,7 @@
         <a href="${ctx}/home">Trang Chủ</a>
         <a href="${ctx}/videos">Sản phẩm</a>
         <a href="${ctx}/cart">Giỏ hàng (<b style="color:#ffeb3b;">${sessionScope.cart != null ? sessionScope.cart.totalQuantity : 0}</b>)</a>
+        <a href="${ctx}/order-history">Lịch sử đặt hàng</a>
         <c:choose>
             <c:when test="${empty sessionScope.user}">
                 <a href="${ctx}/login">Đăng nhập</a>
