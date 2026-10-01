@@ -21,7 +21,7 @@
     </c:if>
 
     <c:choose>
-        <c:when test="${empty cart or cart.empty}">
+        <c:when test="${empty cart or empty cart.items}">
             <div style="text-align:center; padding: 40px 20px; background:#fff; border:1px solid #ccd; border-radius:6px;">
                 <p style="font-size:18px; color:#555;">Giỏ hàng của bạn hiện đang trống!</p>
                 <p><a href="${ctx}/videos" class="btn">Tiếp tục xem sản phẩm</a></p>
