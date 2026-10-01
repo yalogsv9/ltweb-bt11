@@ -5,11 +5,13 @@ GO
 USE LTWebDe04;
 GO
 
-IF OBJECT_ID('Favorites') IS NOT NULL DROP TABLE Favorites;
-IF OBJECT_ID('Shares')    IS NOT NULL DROP TABLE Shares;
-IF OBJECT_ID('Videos')    IS NOT NULL DROP TABLE Videos;
-IF OBJECT_ID('Category')  IS NOT NULL DROP TABLE Category;
-IF OBJECT_ID('Users')     IS NOT NULL DROP TABLE Users;
+IF OBJECT_ID('OrderDetails') IS NOT NULL DROP TABLE OrderDetails;
+IF OBJECT_ID('Orders')       IS NOT NULL DROP TABLE Orders;
+IF OBJECT_ID('Favorites')    IS NOT NULL DROP TABLE Favorites;
+IF OBJECT_ID('Shares')       IS NOT NULL DROP TABLE Shares;
+IF OBJECT_ID('Videos')       IS NOT NULL DROP TABLE Videos;
+IF OBJECT_ID('Category')     IS NOT NULL DROP TABLE Category;
+IF OBJECT_ID('Users')        IS NOT NULL DROP TABLE Users;
 GO
 
 CREATE TABLE Users (
@@ -100,4 +102,29 @@ INSERT INTO Favorites (LikedDate, VideoId, Username) VALUES ('2026-09-02', N'V00
 INSERT INTO Favorites (LikedDate, VideoId, Username) VALUES ('2026-09-02', N'V001', N'user3');
 INSERT INTO Favorites (LikedDate, VideoId, Username) VALUES ('2026-09-03', N'V006', N'user1');
 INSERT INTO Favorites (LikedDate, VideoId, Username) VALUES ('2026-09-04', N'V009', N'user2');
+GO
+
+-- Bang Orders (Don hang COD & 8 trang thai)
+CREATE TABLE Orders (
+    OrderId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    Username NVARCHAR(50) NULL REFERENCES Users(Username),
+    ReceiverName NVARCHAR(100) NOT NULL,
+    ReceiverPhone NVARCHAR(20) NOT NULL,
+    ReceiverAddress NVARCHAR(255) NOT NULL,
+    Note NVARCHAR(500) NULL,
+    TotalAmount DECIMAL(18,2) NOT NULL,
+    PaymentMethod NVARCHAR(50) NOT NULL DEFAULT N'COD',
+    Status NVARCHAR(50) NOT NULL DEFAULT N'Đơn hàng mới',
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+
+-- Bang OrderDetails (Chi tiet san pham trong don hang)
+CREATE TABLE OrderDetails (
+    DetailId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    OrderId INT NOT NULL REFERENCES Orders(OrderId) ON DELETE CASCADE,
+    VideoId NVARCHAR(50) NOT NULL REFERENCES Videos(VideoId),
+    Price DECIMAL(18,2) NOT NULL,
+    Quantity INT NOT NULL,
+    Amount DECIMAL(18,2) NOT NULL
+);
 GO

@@ -26,15 +26,17 @@ public class LoginController_24110291 extends HttpServlet {
         String username = req.getParameter("username");
         String password = req.getParameter("password");
         User_24110291 u = userService.login(username, password);
-        if (u != null && u.isAdmin()) {
+        if (u != null) {
             req.getSession().setAttribute("user", u);
-            resp.sendRedirect(req.getContextPath() + "/admin/home");
+            if (u.isAdmin()) {
+                resp.sendRedirect(req.getContextPath() + "/admin/home");
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/home");
+            }
             return;
         }
         req.setAttribute("username", username);
-        req.setAttribute("error", u == null
-                ? "Sai ten dang nhap, mat khau hoac tai khoan chua kich hoat."
-                : "Tai khoan khong co quyen quan tri (admin).");
+        req.setAttribute("error", "Sai tên đăng nhập, mật khẩu hoặc tài khoản chưa kích hoạt.");
         req.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(req, resp);
     }
 }
